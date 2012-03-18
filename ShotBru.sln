@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroLiquidCrystal", "MicroLiquidCrystal\MicroLiquidCrystal.csproj", "{B4B72543-E638-44F1-B096-9BBB6BD4698B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShotBru", "ShotBru\ShotBru.csproj", "{1B0E2672-A4BB-438A-AAB7-1B9633A028B3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4B72543-E638-44F1-B096-9BBB6BD4698B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4B72543-E638-44F1-B096-9BBB6BD4698B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4B72543-E638-44F1-B096-9BBB6BD4698B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4B72543-E638-44F1-B096-9BBB6BD4698B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B0E2672-A4BB-438A-AAB7-1B9633A028B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B0E2672-A4BB-438A-AAB7-1B9633A028B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B0E2672-A4BB-438A-AAB7-1B9633A028B3}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{1B0E2672-A4BB-438A-AAB7-1B9633A028B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B0E2672-A4BB-438A-AAB7-1B9633A028B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B0E2672-A4BB-438A-AAB7-1B9633A028B3}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
