@@ -11,7 +11,7 @@ namespace ShotBru
         private int threshold;
         private bool isPaused;
         private bool isTriggered;
-        private Thread triggerThread;
+        private Timer sampleRateTimer;
         private AnalogInput analogInput;
         private OutputPort power;
         private int currentValue;
@@ -23,13 +23,12 @@ namespace ShotBru
             isTriggered = false;
             currentValue = 0;
             isPaused = true;
-            threshold = 510;
+            threshold = 550;
             analogInput = new AnalogInput(analogInputPin);
             power = new OutputPort(powerPin, true);
             // power up the sensor
             power.Write(false);
-            triggerThread = new Thread(new ThreadStart(ReadAnalogValue));
-            triggerThread.Start();
+            sampleRateTimer = new Timer(new TimerCallback(ReadAnalogValue), null, 10, 10);
         }
 
         public int Value
@@ -62,35 +61,30 @@ namespace ShotBru
         public void Dispose()
         {
             power.Write(true);
-            triggerThread.Suspend();
+            sampleRateTimer.Dispose();
             analogInput.Dispose();
             power.Dispose();
         }
 
-        private void ReadAnalogValue()
+        private void ReadAnalogValue(object state)
         {
-            while (true)
+            currentValue = analogInput.Read();
+
+            if (currentValue > threshold)
             {
-                currentValue = analogInput.Read();
+                isTriggered = true;
 
-                if (currentValue > threshold)
+                // fire the event if not in the paused state
+                if (!isPaused)
                 {
-                    isTriggered = true;
-
-                    // fire the event if not in the paused state
-                    if (!isPaused)
-                    {
-                        isPaused = true;
-                        if (Triggered != null)
-                            Triggered(currentValue);
-                    }
+                    isPaused = true;
+                    if (Triggered != null)
+                        Triggered(currentValue);
                 }
-                else
-                {
-                    isTriggered = false;
-                }
-
-                Thread.Sleep(10); // 10mS loop
+            }
+            else
+            {
+                isTriggered = false;
             }
         }
 

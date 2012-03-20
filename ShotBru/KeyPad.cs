@@ -6,7 +6,7 @@ using Microsoft.SPOT.Hardware;
 
 namespace ShotBru
 {
-    public class KeyPad
+    public class KeyPad : IDisposable
     {
         private Timer timer;
         private AnalogInput keyPadInput;
@@ -24,13 +24,8 @@ namespace ShotBru
 
         private void TimerCallback(object state)
         {
-            int analogValue = 0;
-            // read in loop to debounce switch
-            for (int i = 0; i < 3; i++)
-            {
-                analogValue = keyPadInput.Read();
-                if (i < 3) Thread.Sleep(10);
-            }
+            // no need to debounce the switch if we are just sampling
+            int analogValue = keyPadInput.Read();
 
             // figure out which key was pressed
             currentKey = GetKeyPressed(analogValue);
@@ -48,31 +43,19 @@ namespace ShotBru
         private Key GetKeyPressed(int analogValue)
         {
             Key keyPressed = Key.None;
-            if (analogValue < 900)
-            {
-                if (analogValue < 750)
-                {
-                    if (analogValue < 580)
-                    {
-                        if (analogValue < 480)
-                        {
-                            if (analogValue < 300)
-                            {
-                                if (analogValue < 200)
-                                {
-                                    keyPressed = Key.Menu;
-                                }
-                                else { keyPressed = Key.Select; }
-                            }
-                            else { keyPressed = Key.Left; }
-                        }
-                        else { keyPressed = Key.Down; }
-                    }
-                    else { keyPressed = Key.Right; }
-                }
-                else { keyPressed = Key.Up; }
-            }
+            if (analogValue <= 900 && analogValue > 750) { keyPressed = Key.Up; }
+            else if (analogValue <= 750 && analogValue > 580) { keyPressed = Key.Right; }
+            else if (analogValue <= 580 && analogValue > 480) { keyPressed = Key.Down; }
+            else if (analogValue <= 480 && analogValue > 300) { keyPressed = Key.Left; }
+            else if (analogValue <= 300 && analogValue > 200) { keyPressed = Key.Select; }
+            else if (analogValue <= 200) { keyPressed = Key.Menu; }
+
             return keyPressed;
+        }
+
+        public void Dispose()
+        {
+            keyPadInput.Dispose();
         }
     }
 
