@@ -22,6 +22,8 @@ namespace ShotBru
             timer = new Timer(new TimerCallback(TimerCallback), null, 100, 100);
         }
 
+        public Key CurrentKey { get { return currentKey; } }
+
         private void TimerCallback(object state)
         {
             // no need to debounce the switch if we are just sampling

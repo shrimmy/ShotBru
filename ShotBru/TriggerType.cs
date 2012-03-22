@@ -5,8 +5,7 @@ namespace ShotBru
 {
     public enum TriggerType
     {
-        High,
-        Low,
-        Threshold
+        Above,
+        Below
     }
 }

@@ -11,10 +11,11 @@ namespace ShotBru
         private int threshold;
         private bool isPaused;
         private bool isTriggered;
-        private Timer sampleRateTimer;
+        private Thread thread;
         private AnalogInput analogInput;
         private OutputPort power;
         private int currentValue;
+        private TriggerType triggerType;
 
         public event TriggerEventHandler Triggered;
 
@@ -24,11 +25,13 @@ namespace ShotBru
             currentValue = 0;
             isPaused = true;
             threshold = 550;
+            triggerType = TriggerType.Above;
             analogInput = new AnalogInput(analogInputPin);
             power = new OutputPort(powerPin, true);
             // power up the sensor
             power.Write(false);
-            sampleRateTimer = new Timer(new TimerCallback(ReadAnalogValue), null, 10, 10);
+            thread = new Thread(new ThreadStart(ContinuousRead));
+            thread.Start();
         }
 
         public int Value
@@ -52,6 +55,12 @@ namespace ShotBru
             get { return isTriggered; }
         }
 
+        public TriggerType TriggerType
+        {
+            get { return triggerType; }
+            set { triggerType = value; }
+        }
+
         public void Start()
         {
             isTriggered = false;
@@ -61,33 +70,50 @@ namespace ShotBru
         public void Dispose()
         {
             power.Write(true);
-            sampleRateTimer.Dispose();
+            thread.Abort();
             analogInput.Dispose();
             power.Dispose();
         }
 
-        private void ReadAnalogValue(object state)
+        private void ContinuousRead()
         {
-            currentValue = analogInput.Read();
-
-            if (currentValue > threshold)
+            while (true)
             {
-                isTriggered = true;
-
-                // fire the event if not in the paused state
-                if (!isPaused)
-                {
-                    isPaused = true;
-                    if (Triggered != null)
-                        Triggered(currentValue);
-                }
-            }
-            else
-            {
-                isTriggered = false;
+                ReadAnalogValue();
+                Thread.Sleep(10);
             }
         }
 
+        private void ReadAnalogValue()
+        {
+            currentValue = analogInput.Read();
+
+            int difference = threshold - currentValue;
+            isTriggered = false;
+            if (triggerType == ShotBru.TriggerType.Above)
+            {
+                if (difference < 0)
+                    SetTrigger();
+            }
+            else
+            {
+                if (difference > 0)
+                    SetTrigger();
+            }
+        }
+
+        private void SetTrigger()
+        {
+            isTriggered = true;
+
+            // fire the event if not in the paused state
+            if (!isPaused)
+            {
+                isPaused = true;
+                if (Triggered != null)
+                    Triggered(currentValue);
+            }
+        }
     }
 
     public delegate void TriggerEventHandler(int value);
