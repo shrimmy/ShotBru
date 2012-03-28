@@ -16,7 +16,7 @@ namespace ShotBru
         private Timer displayTimer;
 
         // pin defenitions
-        private Cpu.Pin keyPad_IN = Pins.GPIO_PIN_A0;
+        private Cpu.Pin keyPad_Input = Pins.GPIO_PIN_A0;
         private Cpu.Pin sensor1_Input = Pins.GPIO_PIN_A1;
         //private Cpu.Pin sensor1_Tip = Pins.GPIO_PIN_A2;
         private Cpu.Pin sensor1_Power = Pins.GPIO_PIN_D0;
@@ -53,8 +53,6 @@ namespace ShotBru
             lcd.Begin(16, 2);
             DisplayLine("Shot Bru (V1)");
             DisplayLine("Initializing...", 1);
-            // wait for 1 second, not necessary
-            Thread.Sleep(1000);
 
             model = new ShotModel
             {
@@ -62,17 +60,21 @@ namespace ShotBru
                 CurrentSensorMode = SensorMode.Interval
             };
 
-            keyPad = new KeyPad(keyPad_IN);
+            keyPad = new KeyPad(keyPad_Input);
             keyPad.KeyPressed += new KeyPressedEventHandler(keyPad_KeyPressed);
 
-            // setup the display timer to fire every 250mS,
-            displayTimer = new Timer(new TimerCallback(displayTimer_Fired), model, 250, 250);
 
             sensor1 = new Sensor(sensor1_Input, sensor1_Power);
             sensor1.Triggered += new TriggerEventHandler(sensor1_Triggered);
-            sensor1.Start();
 
             camera1 = new Camera(camera1_Shutter);
+            
+            // setup the display timer to fire every 250mS,
+            displayTimer = new Timer(new TimerCallback(displayTimer_Fired), model, 250, 250);
+
+            // wait for 1 second, gives sensors a chance to start up
+            Thread.Sleep(1000);
+            sensor1.Start();
         }
 
         /// <summary>
