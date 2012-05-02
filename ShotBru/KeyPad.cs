@@ -9,7 +9,7 @@ namespace ShotBru
     public class KeyPad : IDisposable
     {
         private Timer timer;
-        private AnalogInput keyPadInput;
+        private SecretLabs.NETMF.Hardware.AnalogInput keyPadInput;
         private Key lastKey;
         private Key currentKey;
 
@@ -18,7 +18,7 @@ namespace ShotBru
         public KeyPad(Cpu.Pin pin)
         {
             currentKey = Key.None;
-            keyPadInput = new AnalogInput(pin);
+            keyPadInput = new SecretLabs.NETMF.Hardware.AnalogInput(pin);
             timer = new Timer(new TimerCallback(TimerCallback), null, 100, 100);
         }
 

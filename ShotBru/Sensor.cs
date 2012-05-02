@@ -12,7 +12,7 @@ namespace ShotBru
         private bool isPaused;
         private bool isTriggered;
         private Thread thread;
-        private AnalogInput analogInput;
+        private SecretLabs.NETMF.Hardware.AnalogInput analogInput;
         private OutputPort power;
         private int currentValue;
         private TriggerType triggerType;
@@ -26,7 +26,7 @@ namespace ShotBru
             isPaused = true;
             threshold = 550;
             triggerType = TriggerType.Above;
-            analogInput = new AnalogInput(analogInputPin);
+            analogInput = new SecretLabs.NETMF.Hardware.AnalogInput(analogInputPin);
             power = new OutputPort(powerPin, true);
             // power up the sensor
             power.Write(false);
