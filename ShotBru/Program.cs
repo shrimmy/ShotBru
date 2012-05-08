@@ -5,6 +5,8 @@ using Microsoft.SPOT.Hardware;
 using SecretLabs.NETMF.Hardware;
 using SecretLabs.NETMF.Hardware.Netduino;
 using MicroLiquidCrystal;
+using ShotBru.Models;
+using ShotBru.Modes;
 
 namespace ShotBru
 {
@@ -14,6 +16,7 @@ namespace ShotBru
         // variables
         private ShotModel model;
         private Timer displayTimer;
+        private ModeController modeController;
 
         // pin defenitions
         private Cpu.Pin keyPad_Input = Pins.GPIO_PIN_A0;
@@ -54,17 +57,17 @@ namespace ShotBru
             DisplayLine("Shot Bru (V1)");
             DisplayLine("Initializing...", 1);
 
-            model = new ShotModel
-            {
-                CurrentRunMode = RunMode.Setup,
-                CurrentSensorMode = SensorMode.Interval
-            };
+            model = new ShotModel();
+            modeController = new ModeController(new Mode[] 
+                {
+                    new HomeMode(model),
+                    new LightMode(model),
+                });
 
             keyPad = new KeyPad(keyPad_Input);
             keyPad.KeyPressed += new KeyPressedEventHandler(keyPad_KeyPressed);
 
-
-            sensor1 = new Sensor(sensor1_Input, sensor1_Power);
+            sensor1 = new Sensor(model, sensor1_Input, sensor1_Power);
             sensor1.Triggered += new TriggerEventHandler(sensor1_Triggered);
 
             camera1 = new Camera(camera1_Shutter);
@@ -74,7 +77,7 @@ namespace ShotBru
 
             // wait for 1 second, gives sensors a chance to start up
             Thread.Sleep(1000);
-            sensor1.Start();
+            //sensor1.Start();
         }
 
         /// <summary>
@@ -90,28 +93,52 @@ namespace ShotBru
 
         private void displayTimer_Fired(object state)
         {
-            // debug for now, just show sensor reading, threashold & isTriggered
-            DisplayLine(Utility.Pad(sensor1.Value, 4) + (sensor1.TriggerType == TriggerType.Above ? " > " : " < ") + Utility.Pad(sensor1.Threshold, 4) + " " + (sensor1.IsTriggered ? "*" : " "), 1);
+            Mode v = modeController.Current;
+
+            lcd.SetCursorPosition(0, 0);
+            lcd.Write(Utility.PadEnd(v.Line1, 16));
+            lcd.SetCursorPosition(0, 1);
+            lcd.Write(Utility.PadEnd(v.Line2, 16));
         }
 
         private void sensor1_Triggered(int value)
         {
-            // Test code that will take a photo when the sensor is triggered, pause for 5 seconds & reactivate the sensor
+            if (model.TriggerDelay > 0) { Thread.Sleep(model.TriggerDelay * 1000); } // delay before taking photo
+            model.TriggerCount++;
             camera1.TakePhoto();
-            DisplayLine("Camera Triggered");
-            Thread.Sleep(4000);
-            DisplayLine("Activating...");
-            Thread.Sleep(1000);
-            DisplayLine("Shot Bru (V1)");
-            sensor1.Start();
+            modeController.Current.Hide();
+            if (model.IsAutoReset && model.AutoResetDelay > 0) 
+            { 
+                // delay before activating again
+                Thread.Sleep(model.AutoResetDelay * 1000);
+                model.IsPaused = false;
+            }
+            modeController.Current.Show();
         }
 
         private void keyPad_KeyPressed(Key key)
         {
-            if (key == Key.Up) { sensor1.Threshold += 10; }
-            if (key == Key.Down) { sensor1.Threshold -= 10; }
-            if (key == Key.Left) { sensor1.TriggerType = TriggerType.Below; }
-            if (key == Key.Right) { sensor1.TriggerType = TriggerType.Above; }
+            if (key == Key.Menu)
+            {
+                if (model.IsExecuting)
+                {
+                    // immediately stop executing
+                    model.IsExecuting = false;
+                    modeController.ResetCurrent();
+                }
+                else
+                {
+                    modeController.Next();
+                }
+            }
+            else
+            {
+                if (!model.IsExecuting)
+                {
+                    // route all other keys, but only if we are not currently executing
+                    modeController.Current.RouteKeyPressed(key);
+                }
+            }
         }
     }
 }

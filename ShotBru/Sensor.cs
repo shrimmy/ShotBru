@@ -3,29 +3,33 @@ using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using System.Threading;
 using SecretLabs.NETMF.Hardware;
+using ShotBru.Models;
 
 namespace ShotBru
 {
     public class Sensor : IDisposable
     {
-        private int threshold;
-        private bool isPaused;
-        private bool isTriggered;
+        //private int threshold;
+        //private bool isPaused;
+        //private bool isTriggered;
         private Thread thread;
         private SecretLabs.NETMF.Hardware.AnalogInput analogInput;
         private OutputPort power;
         private int currentValue;
-        private TriggerType triggerType;
+        //private TriggerType triggerType;
+        private readonly ShotModel model;
 
         public event TriggerEventHandler Triggered;
 
-        public Sensor(Cpu.Pin analogInputPin, Cpu.Pin powerPin)
+        public Sensor(ShotModel model, Cpu.Pin analogInputPin, Cpu.Pin powerPin)
         {
-            isTriggered = false;
+            this.model = model;
+
+            //isTriggered = false;
             currentValue = 0;
-            isPaused = true;
-            threshold = 550;
-            triggerType = TriggerType.Above;
+            //isPaused = true;
+            //threshold = 550;
+            //triggerType = TriggerType.Above;
             analogInput = new SecretLabs.NETMF.Hardware.AnalogInput(analogInputPin);
             power = new OutputPort(powerPin, true);
             // power up the sensor
@@ -39,32 +43,34 @@ namespace ShotBru
             get { return currentValue; }
         }
 
-        public int Threshold
-        {
-            get { return threshold; }
-            set { threshold = value; }
-        }
+        //public int Threshold
+        //{
+        //    get { return threshold; }
+        //    set { threshold = value; }
+        //}
 
-        public bool IsPaused
-        {
-            get { return isPaused; }
-        }
+        //public bool IsPaused
+        //{
+        //    get { return isPaused; }
+        //}
 
-        public bool IsTriggered
-        {
-            get { return isTriggered; }
-        }
+        //public bool IsTriggered
+        //{
+        //    get { return isTriggered; }
+        //}
 
-        public TriggerType TriggerType
-        {
-            get { return triggerType; }
-            set { triggerType = value; }
-        }
+        //public TriggerType TriggerType
+        //{
+        //    get { return triggerType; }
+        //    set { triggerType = value; }
+        //}
 
         public void Start()
         {
-            isTriggered = false;
-            isPaused = false;
+            model.IsTriggered = false;
+            model.IsPaused = false;
+            //isTriggered = false;
+            //isPaused = false;
         }
 
         public void Dispose()
@@ -87,10 +93,12 @@ namespace ShotBru
         private void ReadAnalogValue()
         {
             currentValue = analogInput.Read();
-
-            int difference = threshold - currentValue;
-            isTriggered = false;
-            if (triggerType == ShotBru.TriggerType.Above)
+            model.SensorValue = currentValue;
+            int difference = model.Threshold - currentValue;
+            //isTriggered = false;
+            model.IsTriggered = false;
+            //if (triggerType == ShotBru.TriggerType.Above)
+            if (model.TriggerOnRisingEdge)
             {
                 if (difference < 0)
                     SetTrigger();
@@ -104,12 +112,14 @@ namespace ShotBru
 
         private void SetTrigger()
         {
-            isTriggered = true;
-
+            //isTriggered = true;
+            model.IsTriggered = true;
             // fire the event if not in the paused state
-            if (!isPaused)
+            //if (!isPaused)
+            if (!model.IsPaused)
             {
-                isPaused = true;
+                //isPaused = true;
+                model.IsPaused = true;
                 if (Triggered != null)
                     Triggered(currentValue);
             }

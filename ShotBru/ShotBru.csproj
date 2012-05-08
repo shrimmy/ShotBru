@@ -35,14 +35,21 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="ModeController.cs" />
+    <Compile Include="Modes\HomeMode.cs" />
+    <Compile Include="Modes\LightMode.cs" />
+    <Compile Include="Modes\Mode.cs" />
+    <Compile Include="Modes\Settings\AutoResetSetting.cs" />
+    <Compile Include="Modes\Settings\Setting.cs" />
+    <Compile Include="Modes\Settings\ThresholdSetting.cs" />
+    <Compile Include="Modes\Settings\TriggerDelaySetting.cs" />
+    <Compile Include="Modes\Settings\AutoResetDelaySetting.cs" />
+    <Compile Include="Modes\Settings\TriggerEdgeSetting.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="KeyPad.cs" />
-    <Compile Include="RunMode.cs" />
     <Compile Include="Sensor.cs" />
-    <Compile Include="SensorMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ShotModel.cs" />
-    <Compile Include="TriggerType.cs" />
+    <Compile Include="Models\ShotModel.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
